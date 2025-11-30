@@ -5,7 +5,7 @@ const NavBar = ({ currentUser, onLogout, onAuthSwitch }) => {
     <nav className="app-nav">
       <div className="nav-inner">
         <div className="nav-left">
-          <div className="nav-logo">HotelFlow</div>
+          <div className="nav-logo">Cloudbeds</div>
           <div className="nav-links">
             <button type="button" className="link-like" onClick={() => onAuthSwitch?.('login')}>Inicio</button>
           </div>

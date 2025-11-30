@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  database:
+    container_name: cloudbeds_db
+    image: mongo:latest
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - cloudbeds_network
+
+  backend:
+    container_name: cloudbeds_backend
+    restart: unless-stopped
+    build:
+      context: ../backend_so
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=development
+      - MONGO_URI=mongodb://database:27017/cloudbeds
+    depends_on:
+      - database
+    networks:
+      - cloudbeds_network
+    volumes:
+      - ../backend_so:/usr/src/app
+      - /usr/src/app/node_modules
+
+  frontend:
+    container_name: cloudbeds_frontend
+    restart: unless-stopped
+    build:
+      context: .
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:4000
+    depends_on:
+      - backend
+    networks:
+      - cloudbeds_network
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+
+networks:
+  cloudbeds_network:
+    driver: bridge
+
+volumes:
+  mongo_data:
