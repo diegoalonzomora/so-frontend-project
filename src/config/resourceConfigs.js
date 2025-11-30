@@ -48,7 +48,6 @@ const resourceConfigs = [
       { name: 'telefonoContacto', label: 'Teléfono', type: 'text', required: true },
       { name: 'correo', label: 'Correo', type: 'email', required: true },
       { name: 'calificacion', label: 'Calificación', type: 'number', required: true },
-      { name: 'numeroHabitaciones', label: 'Número habitaciones', type: 'int', required: true },
       { name: 'descripcion', label: 'Descripción', type: 'textarea', required: true },
     ],
     columns: [
@@ -79,7 +78,7 @@ const resourceConfigs = [
         label: 'Estado',
         type: 'select',
         required: true,
-        options: ['Disponible', 'Ocupada', 'Mantenimiento'].map((value) => ({ label: value, value })),
+        options: ['Disponible', 'Ocupada', 'Mantenimiento', 'Inactivo'].map((value) => ({ label: value, value })),
       },
       { name: 'precioNoche', label: 'Precio por noche', type: 'number', required: true },
       { name: 'descripcion', label: 'Descripción', type: 'textarea', required: true },

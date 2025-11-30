@@ -76,7 +76,7 @@ function App() {
               : 'Inicia sesión para acceder a todas las funcionalidades del sistema.'}
           </p>
         </div>
-        {currentUser && (
+        {(currentUser && isAdmin) && (
           <div className="hero-stats">
             {heroStats.map((stat) => (
               <article key={stat.label} className="stat-card">

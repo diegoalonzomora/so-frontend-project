@@ -137,13 +137,33 @@ const ResourceCrud = ({ config }) => {
 
     const payload = buildPayload(fields, formState);
 
+    // Si es un hotel nuevo, agregar numeroHabitaciones: 0
+    if (endpoint === '/hoteles' && !editingId) {
+      payload.numeroHabitaciones = 0;
+    }
+
     try {
       if (editingId) {
         await api.update(endpoint, editingId, payload);
         setMessage('Registro actualizado correctamente');
       } else {
-        await api.create(endpoint, payload);
+        const createdItem = await api.create(endpoint, payload);
         setMessage('Registro creado correctamente');
+        
+        // Si es una habitación nueva, incrementar numeroHabitaciones del hotel
+        if (endpoint === '/habitaciones' && createdItem && payload.idHotel) {
+          try {
+            const hotel = await api.retrieve('/hoteles', payload.idHotel);
+            if (hotel) {
+              await api.update('/hoteles', payload.idHotel, {
+                ...hotel,
+                numeroHabitaciones: (hotel.numeroHabitaciones || 0) + 1,
+              });
+            }
+          } catch (err) {
+            console.error('Error actualizando contador de habitaciones:', err);
+          }
+        }
       }
       await fetchItems();
       refreshFormState();
@@ -167,9 +187,36 @@ const ResourceCrud = ({ config }) => {
   const handleDelete = async (id) => {
     setError('');
     setMessage('');
+    
     try {
-      await api.remove(endpoint, id);
-      setMessage('Registro eliminado');
+      // Si es una habitación, cambiar estado a "Inactivo" en lugar de eliminar
+      if (endpoint === '/habitaciones') {
+        const habitacion = await api.retrieve(endpoint, id);
+        if (habitacion) {
+          await api.update(endpoint, id, {
+            ...habitacion,
+            estado: 'Inactivo',
+          });
+          setMessage('Habitación marcada como inactiva');
+          
+          // Decrementar numeroHabitaciones del hotel
+          try {
+            const hotel = await api.retrieve('/hoteles', habitacion.idHotel);
+            if (hotel && hotel.numeroHabitaciones > 0) {
+              await api.update('/hoteles', habitacion.idHotel, {
+                ...hotel,
+                numeroHabitaciones: hotel.numeroHabitaciones - 1,
+              });
+            }
+          } catch (err) {
+            console.error('Error actualizando contador de habitaciones:', err);
+          }
+        }
+      } else {
+        // Para otros recursos, eliminar normalmente
+        await api.remove(endpoint, id);
+        setMessage('Registro eliminado');
+      }
       await fetchItems();
     } catch (err) {
       setError(err.message);
